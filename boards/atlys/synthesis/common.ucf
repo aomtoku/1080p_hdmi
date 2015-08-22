@@ -14,14 +14,14 @@ Config ENABLE_SUSPEND = "FILTERED" ;
 # Reset button and LEDs
 ########################################
 NET "RSTBTN_"       LOC = "T15" | IOSTANDARD = LVCMOS33;
-NET "LED<0>"        LOC = "U18" | IOSTANDARD = LVCMOS33;
-NET "LED<1>"        LOC = "M14" | IOSTANDARD = LVCMOS33;
-NET "LED<2>"        LOC = "N14" | IOSTANDARD = LVCMOS33;
-NET "LED<3>"        LOC = "L14" | IOSTANDARD = LVCMOS33;
-NET "LED<4>"        LOC = "M13" | IOSTANDARD = LVCMOS33;
-NET "LED<5>"        LOC = "D4" | IOSTANDARD = LVCMOS33;
-NET "LED<6>"        LOC = "P16" | IOSTANDARD = LVCMOS33;
-NET "LED<7>"        LOC = "N12" | IOSTANDARD = LVCMOS33;
+#NET "LED<0>"        LOC = "U18" | IOSTANDARD = LVCMOS33;
+#NET "LED<1>"        LOC = "M14" | IOSTANDARD = LVCMOS33;
+#NET "LED<2>"        LOC = "N14" | IOSTANDARD = LVCMOS33;
+#NET "LED<3>"        LOC = "L14" | IOSTANDARD = LVCMOS33;
+#NET "LED<4>"        LOC = "M13" | IOSTANDARD = LVCMOS33;
+#NET "LED<5>"        LOC = "D4" | IOSTANDARD = LVCMOS33;
+#NET "LED<6>"        LOC = "P16" | IOSTANDARD = LVCMOS33;
+#NET "LED<7>"        LOC = "N12" | IOSTANDARD = LVCMOS33;
 
 ##############################################################################
 # SYSCLK Input
@@ -33,7 +33,7 @@ NET "SYS_CLK"       LOC = "L15" | IOSTANDARD = LVCMOS33 | PERIOD = 100 MHz;
 # Mechanical Switches (SW)
 ##############################################################################
 
-NET "SW"         LOC = "A10" | IOSTANDARD = LVCMOS33 ;
+#NET "SW"         LOC = "A10" | IOSTANDARD = LVCMOS33 ;
 #NET "SW<1>"         LOC = "D14" | IOSTANDARD = LVCMOS33 ;
 #NET "SW<2>"         LOC = "C14" | IOSTANDARD = LVCMOS33 ;
 #NET "SW<3>"         LOC = "P15" | IOSTANDARD = LVCMOS33 ;

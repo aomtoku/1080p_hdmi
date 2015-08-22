@@ -6,9 +6,7 @@ module top (
 //	input  wire                        RX0_SCL,
 //	inout  wire                        RX0_SDA,
 	output wire                  [3:0] TMDS,
-	output wire                  [3:0] TMDSB,
-    input  wire                        SW,
-	output wire                  [7:0] LED
+	output wire                  [3:0] TMDSB
 );
 
 
@@ -20,31 +18,6 @@ assign clk50m = clk_buf;
 always @(posedge clk100) clk_buf <= ~clk_buf;
 
 BUFG clk50m_bufgbufg (.I(clk50m), .O(clk50m_bufg));
-///* --------- Switching Logic -------------- */
-//wire  sws_sync;
-//synchro #(.INITIALIZE("LOGIC0"))
-//synchro_sws_0 (.async(SW),.sync(sws_sync),.clk(clk50m_bufg));
-//reg  sws_sync_q;
-//always @ (posedge clk50m_bufg) sws_sync_q <= sws_sync;
-//wire sw0_rdy;
-//
-// debnce debsw0 (
-//    .sync(sws_sync_q),
-//    .debnced(sw0_rdy),
-//    .clk(clk50m_bufg)
-// );
-//
-//wire pclk;
-//wire sws_clk;
-//synchro #(.INITIALIZE("LOGIC0"))
-//clk_sws_0 (.async(SW),.sync(sws_clk),.clk(pclk));
-//
-//reg  [3:0] sws_clk_sync; //clk synchronous output
-//always @(posedge pclk) begin
-//    sws_clk_sync <= sws_clk;
-//end
-
-
 /* --------- Power UP logic -------------- */
 wire pclk_lckd;
 wire pwrup;
@@ -96,6 +69,11 @@ wire [11:0] tc_vesync = VLINES_HDTV1080P  - 12'd1 + VFNPRCH_HDTV1080P + VSYNCPW_
 wire [11:0] tc_veblnk = VLINES_HDTV1080P  - 12'd1 + VFNPRCH_HDTV1080P + VSYNCPW_HDTV1080P + VBKPRCH_HDTV1080P;
 wire hvsync_polarity  = 1'b0;
 
+/*
+ *  PLL 148.5MHz Generation
+ *  Multiply = 199
+ *  Divide   = 67
+ */
 wire [7:0] pclk_M = 8'd199 - 8'd1;
 wire [7:0] pclk_D = 8'd67 - 8'd1;
 
@@ -144,17 +122,8 @@ wire clkfbout;
 
 /* --------- Pixel Rate clock buffer ---------- */
 BUFG pclkbufg (.I(pllclk1), .O(pclk));
-
-//////////////////////////////////////////////////////////////////
-// 2x pclk is going to be used to drive OSERDES2
-// on the GCLK side
-//////////////////////////////////////////////////////////////////
 BUFG pclkx2bufg (.I(pllclk2), .O(pclkx2));
 
-//////////////////////////////////////////////////////////////////
-// 10x pclk is used to drive IOCLK network so a bit rate reference
-// can be used by OSERDES2
-//////////////////////////////////////////////////////////////////
 PLL_BASE # (
 	.CLKIN_PERIOD(13),
 	.CLKFBOUT_MULT(10), //set VCO to 10x of CLKIN
@@ -219,7 +188,7 @@ assign active = !bgnd_hblnk && !bgnd_vblnk;
 reg active_q;
 reg vsync, hsync;
 reg VGA_HSYNC, VGA_VSYNC;
-reg de = 1'b0;
+reg vde;
 
 always @ (posedge pclk) begin
 	hsync <= VGA_HSYNC_INT ^ hvsync_polarity ;
@@ -228,13 +197,9 @@ always @ (posedge pclk) begin
 	VGA_VSYNC <= vsync;
 	
 	active_q <= active;
-	de <= active_q;
+	vde <= active_q;
 end
 
-  ///////////////////////////////////
-  // Video pattern generator:
-  //   SMPTE HD Color Bar
-  ///////////////////////////////////
 wire [7:0] hdc_red, hdc_blue, hdc_green;
 wire [7:0] red_data    = hdc_red  ;
 wire [7:0] green_data  = hdc_green;
@@ -255,7 +220,7 @@ hdmi_encoder_top enc0 (
 	.aux2_din        (4'd0),
 	.hsync           (VGA_HSYNC),
 	.vsync           (VGA_VSYNC),
-	.vde             (de),
+	.vde             (vde),
 	.ade             (1'b0),
 	.sdata_r         (), // 10bit Red Channel
 	.sdata_g         (), // 10bit Green Channel
@@ -352,7 +317,6 @@ hdmi_decoder hdmi_decode0 (
 	.blue        (rx0_blue)
 ); 
 `endif
-assign LED = {5'b11111,pclk_lckd, pll_lckd, de};
 
 endmodule
 
