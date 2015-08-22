@@ -149,7 +149,7 @@ synchro #(.INITIALIZE("LOGIC1"))
 synchro_reset (.async(!pll_lckd),.sync(reset),.clk(pclk));
 
 
-wire VGA_HSYNC_INT, VGA_VSYNC_INT;
+wire hdmi_hsync_int, hdmi_vsync_int;
 wire   [11:0] bgnd_hcount;
 wire          bgnd_hsync;
 wire          bgnd_hblnk;
@@ -157,21 +157,20 @@ wire   [11:0] bgnd_vcount;
 wire          bgnd_vsync;
 wire          bgnd_vblnk;
 
-
 timing timing_inst (
     .tc_hsblnk(tc_hsblnk), //input
     .tc_hssync(tc_hssync), //input
     .tc_hesync(tc_hesync), //input
     .tc_heblnk(tc_heblnk), //input
     .hcount(bgnd_hcount), //output
-    .hsync(VGA_HSYNC_INT), //output
+    .hsync(hdmi_hsync_int), //output
     .hblnk(bgnd_hblnk), //output
     .tc_vsblnk(tc_vsblnk), //input
     .tc_vssync(tc_vssync), //input
     .tc_vesync(tc_vesync), //input
     .tc_veblnk(tc_veblnk), //input
     .vcount(bgnd_vcount), //output
-    .vsync(VGA_VSYNC_INT), //output
+    .vsync(hdmi_vsync_int), //output
     .vblnk(bgnd_vblnk), //output
     .restart(reset),
     .clk(pclk)
@@ -182,23 +181,19 @@ assign active = !bgnd_hblnk && !bgnd_vblnk;
 
 reg active_q;
 reg vsync, hsync;
-reg VGA_HSYNC, VGA_VSYNC;
+reg hdmi_hsync, hdmi_vsync;
 reg vde;
+wire [7:0] red_data, green_data, blue_data;
 
 always @ (posedge pclk) begin
-	hsync <= VGA_HSYNC_INT ^ hvsync_polarity ;
-	vsync <= VGA_VSYNC_INT ^ hvsync_polarity ;
-	VGA_HSYNC <= hsync;
-	VGA_VSYNC <= vsync;
+	hsync <= hdmi_hsync_int ^ hvsync_polarity ;
+	vsync <= hdmi_vsync_int ^ hvsync_polarity ;
+	hdmi_hsync <= hsync;
+	hdmi_vsync <= vsync;
 	
 	active_q <= active;
 	vde <= active_q;
 end
-
-wire [7:0] hdc_red, hdc_blue, hdc_green;
-wire [7:0] red_data    = hdc_red  ;
-wire [7:0] green_data  = hdc_green;
-wire [7:0] blue_data   = hdc_blue ;
 
 /* ------------- TMDS Encoder ---------------- */
 hdmi_encoder_top enc0 (
@@ -213,8 +208,8 @@ hdmi_encoder_top enc0 (
 	.aux0_din        (4'd0),
 	.aux1_din        (4'd0),
 	.aux2_din        (4'd0),
-	.hsync           (VGA_HSYNC),
-	.vsync           (VGA_VSYNC),
+	.hsync           (hdmi_hsync),
+	.vsync           (hdmi_vsync),
 	.vde             (vde),
 	.ade             (1'b0),
 	.sdata_r         (), // 10bit Red Channel
@@ -231,9 +226,9 @@ hdcolorbar clrbar(
 	.i_vcnt    (bgnd_vcount),
 	.baronly   (1'b0),
 	.i_format  (2'b00),
-	.o_r       (hdc_red),
-	.o_g       (hdc_green),
-	.o_b       (hdc_blue)
+	.o_r       (red_data),
+	.o_g       (green_data),
+	.o_b       (blue_data)
 );
 
 endmodule
