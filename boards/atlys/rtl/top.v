@@ -1,10 +1,6 @@
 module top (
 	input  wire                        SYS_CLK,
 	input  wire                        RSTBTN_,
-//	input  wire                  [3:0] RX0_TMDS,
-//	input  wire                  [3:0] RX0_TMDSB,
-//	input  wire                        RX0_SCL,
-//	inout  wire                        RX0_SDA,
 	output wire                  [3:0] TMDS,
 	output wire                  [3:0] TMDSB
 );
@@ -33,7 +29,6 @@ SRL16E #(.INIT(16'h1)) pwrup_0 (
 );
 
 reg switch = 1'b0;
-//always @ (posedge clk50m_bufg) switch <= pwrup | sw0_;
 always @ (posedge clk50m_bufg) switch <= pwrup;
 
 wire gopclk;
@@ -240,83 +235,6 @@ hdcolorbar clrbar(
 	.o_g       (hdc_green),
 	.o_b       (hdc_blue)
 );
-
-/* --------------- EDID instance ---------------- */
-`ifdef DECODE
-i2c_edid edid0_inst (
-   .clk(clk100),
-   .rst(~RSTBTN_),
-   .scl(RX0_SCL),
-   .sda(RX0_SDA)
-);
-
-/* --------------- Decoder Port0 ---------------- */
-wire        rx0_tmdsclk;
-wire        rx0_pclkx10, rx0_pllclk0;
-wire        rx0_plllckd;
-wire        rx0_reset;
-wire        rx0_serdesstrobe;
-
-wire        rx0_psalgnerr;      // channel phase alignment error
-wire [7:0]  rx0_red;      // pixel data out
-wire [7:0]  rx0_green;    // pixel data out
-wire [7:0]  rx0_blue;     // pixel data out
-wire        rx0_de;
-wire [29:0] rx0_sdata;
-wire        rx0_blue_vld;
-wire        rx0_green_vld;
-wire        rx0_red_vld;
-wire        rx0_blue_rdy;
-wire        rx0_green_rdy;
-wire        rx0_red_rdy;
-
-hdmi_decoder hdmi_decode0 (
-	.tmdsclk_p   (RX0_TMDS[3]) ,  // tmds clock
-	.tmdsclk_n   (RX0_TMDSB[3]),  // tmds clock
-	.blue_p      (RX0_TMDS[0]) ,  // Blue data in
-	.green_p     (RX0_TMDS[1]) ,  // Green data in
-	.red_p       (RX0_TMDS[2]) ,  // Red data in
-	.blue_n      (RX0_TMDSB[0]),  // Blue data in
-	.green_n     (RX0_TMDSB[1]),  // Green data in
-	.red_n       (RX0_TMDSB[2]),  // Red data in
-	.exrst       (~RSTBTN_)    ,  // external reset input, e.g. reset button
-	
-	.reset       (rx0_reset)       ,  // rx reset
-	.pclk        (rx0_pclk)        ,  // regenerated pixel clock
-	.pclkx2      (rx0_pclkx2)      ,  // double rate pixel clock
-	.pclkx10     (rx0_pclkx10)     ,  // 10x pixel as IOCLK
-	.pllclk0     (rx0_pllclk0)     ,  // send pllclk0 out so it can be fed into a different BUFPLL
-	.pllclk1     (rx0_pllclk1)     ,  // PLL x1 output
-	.pllclk2     (rx0_pllclk2)     ,  // PLL x2 output
-                 
-	.pll_lckd    (rx0_plllckd)     ,  // send pll_lckd out so it can be fed into a different BUFPLL
-	.serdesstrobe(rx0_tmdsclk)     ,  // BUFPLL serdesstrobe output
-	.tmdsclk     (rx0_serdesstrobe),  // TMDS cable clock
-                 
-	.hsync       (rx0_hsync)       , // hsync data
-	.vsync       (rx0_vsync)       , // vsync data
-	.ade         ()                , // data enable
-	.vde         (rx0_de)          , // data enable
-
-	.blue_vld    (rx0_blue_vld)    ,
-	.green_vld   (rx0_green_vld)   ,
-	.red_vld     (rx0_red_vld)     ,
-	.blue_rdy    (rx0_blue_rdy)    ,
-	.green_rdy   (rx0_green_rdy)   ,
-	.red_rdy     (rx0_red_rdy)     ,
-                                   
-	.psalgnerr   (rx0_psalgnerr)   ,
-	.debug       ()                ,
-                       
-	.sdout       (rx0_sdata)       ,
-	.aux0        (),
-	.aux1        (),
-	.aux2        (),
-	.red         (rx0_red)         ,      // pixel data out
-	.green       (rx0_green)       ,    // pixel data out
-	.blue        (rx0_blue)
-); 
-`endif
 
 endmodule
 
